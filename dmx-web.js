@@ -99,7 +99,7 @@ function DMXWeb() {
 				let stepTo = req.body[step].to;
 				
 				if (stepTo.hasOwnProperty('color') || stepTo.hasOwnProperty('opacity')) {
-					stepTo = pliabAnim.convertToDMX(stepTo);
+					stepTo = pliabAnim.convertToDMX(req.body[step]);
 				}
 				
 				console.log('stepTo', stepTo);

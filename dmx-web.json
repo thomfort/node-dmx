@@ -21,6 +21,10 @@
 				{
 					"type": "led-wall-tri-4c-1",
 					"address": 0
+				},
+				{
+					"type": "led-wall-tri-4c-1",
+					"address": 16
 				}
 			]
 		}

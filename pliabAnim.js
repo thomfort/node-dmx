@@ -1,28 +1,31 @@
 const convert = require('color-convert');
 
+// {"0": 255, "1": 0, "2": 244, "3": 255}
+// Channel 4c-1
 module.exports = class plibAnim {
-  static convertToDMX(body) {
-    // {"0": 255, "1": 0, "2": 244, "3": 255}
-    // Channel 4c-1
-    let convertedOpacity, convertedColor;
+  static convertToDMX(step) {
+    const DEVICE_MAP = {
+      1: 0, // d.001
+      2: 15 // d.016
+    };
+    let deviceId = DEVICE_MAP[step.deviceId];
+    let convertedOpacity, convertedColor, dmxFormat = {};
 
-    if (body.opacity === 0) {
+    if (step.to.opacity === 0) {
       convertedOpacity = 0;
       convertedColor = [0, 0, 0];
     } else {
-      convertedColor = this._convertHexToRgb(body.color);
-      convertedOpacity = this._convertOpacity(body.opacity);
+      convertedColor = this._convertHexToRgb(step.to.color);
+      convertedOpacity = this._convertOpacity(step.to.opacity);
     }
 
-    console.log('convertedOpacity', convertedOpacity);
-    console.log('convertedColor', convertedColor);
+    dmxFormat[deviceId]   = convertedOpacity;
+    dmxFormat[++deviceId] = convertedColor[0];
+    dmxFormat[++deviceId] = convertedColor[1];
+    dmxFormat[++deviceId] = convertedColor[2];
 
-    return {
-      "0": convertedOpacity,
-      "1": convertedColor[0],
-      "2": convertedColor[1],
-      "3": convertedColor[2],
-    }
+    console.log('dmxFormat', dmxFormat);
+    return dmxFormat;
   }
 
   static _convertOpacity(opacity) {
