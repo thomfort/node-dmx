@@ -5,6 +5,19 @@ module.exports = {
 	'showtec-multidim2': {
 		channels: ['1', '2', '3', '4']
 	},
+	'led-strip': {
+		channels: ['red', 'green', 'blue'],
+		ranges: {
+			'ctrl': {
+				'type': 'option',
+				'options': [
+					{'value': 0, 'label': 'Red'},
+					{'value': 0, 'label': 'Green'},
+					{'value': 0, 'label': 'Blue'}					
+				]
+			}
+		}
+	},
 	'led-wall-tri-4c-1': {
 		channels: ['dimmer', 'red', 'green', 'blue'],
 		ranges: {

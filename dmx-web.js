@@ -87,6 +87,66 @@ function DMXWeb() {
 		res.json({"state": dmx.universeToObject(req.params.universe)})
 	})
 
+	app.post('/animation/:universe/led/:led', function(req, res) {
+		let ledBar = req.params.led;
+		let percentBar = req.body.percent;
+		let color = req.body.color;
+		const LEDBAR_MAP_START = {
+			1: 0,
+			2: 150
+		};
+		const LEDCHANNEL_MAP = {
+			150: 300
+		}
+
+		try {
+			var universe = dmx.universes[req.params.universe]
+			var old = dmx.universeToObject(req.params.universe)
+			let stepTo;
+			var animation = new A();
+			let ledChannel; // 10 led = 3 x 10
+			let STARTING_AT = LEDBAR_MAP_START[ledBar];
+
+			universe.updateAll(0); // Permet de reseter les led... @todo utiliser update() au lieu de add()
+			ledChannel = percentBar * 150 / 100;		
+
+			(function generateLed1(n) {
+				console.log('LED #1', n, 'de ', ledChannel);						
+				let ledColor = pliabAnim.convertLedColorToDMX(n, color);
+
+				animation.add(ledColor);
+				animation.run(universe);
+				if (n < ledChannel - 3) {
+					setTimeout(function() {
+						generateLed1(n+3);
+					}, 0);
+				}
+			}(0));
+			
+
+			let ledChannel2 = (100-percentBar/2) * 300 / 100;		
+
+			(function generateLed2(n) {
+				console.log('LED #2', n, 'de ', ledChannel2);	
+				let ledColor = pliabAnim.convertLedColorToDMX(n, color);
+
+				animation.add(ledColor);
+				animation.run(universe);
+				if (n > ledChannel2) {
+					setTimeout(function() {
+						generateLed2(n-3);
+					}, 0);
+				}
+			}(300));
+
+			res.json({"success": true});
+		} catch(e) {
+			console.log(e)
+			res.json({"error": String(e)})
+		}
+	
+	});
+
 	app.post('/animation/:universe', function(req, res) {
 		try {
 			var universe = dmx.universes[req.params.universe]
@@ -97,8 +157,11 @@ function DMXWeb() {
 			var animation = new A()			
 			for(var step in req.body) {	
 				let stepTo = req.body[step].to;
-				
-				if (stepTo.hasOwnProperty('color') || stepTo.hasOwnProperty('opacity')) {
+								
+				if (req.body[step].deviceId == 1) {
+					stepTo = pliabAnim.convertToDMX(req.body[step], true);
+				}
+				else if (stepTo.hasOwnProperty('color') || stepTo.hasOwnProperty('opacity')) {
 					stepTo = pliabAnim.convertToDMX(req.body[step]);
 				}
 				
