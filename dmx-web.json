@@ -19,12 +19,12 @@
 			},
 			"devices": [
 				{
-					"type": "led-wall-tri-4c-1",
+					"type": "led-strip",
 					"address": 0
 				},
 				{
 					"type": "led-wall-tri-4c-1",
-					"address": 16
+					"address": 400
 				}
 			]
 		}

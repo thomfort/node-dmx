@@ -87,57 +87,64 @@ function DMXWeb() {
 		res.json({"state": dmx.universeToObject(req.params.universe)})
 	})
 
-	app.post('/animation/:universe/led/:led', function(req, res) {
-		let ledBar = req.params.led;
+	app.post('/animation/:universe/led/', function(req, res) {
+		//let ledBar = req.params.led;
 		let percentBar = req.body.percent;
 		let color = req.body.color;
-		const LEDBAR_MAP_START = {
-			1: 0,
-			2: 150
-		};
-		const LEDCHANNEL_MAP = {
-			150: 300
-		}
 
 		try {
 			var universe = dmx.universes[req.params.universe]
 			var old = dmx.universeToObject(req.params.universe)
 			let stepTo;
 			var animation = new A();
-			let ledChannel; // 10 led = 3 x 10
-			let STARTING_AT = LEDBAR_MAP_START[ledBar];
+			let ledChannel; // 10 led = 3 x 10	
+			let oneLedStrip = 150;
+			let allLedStrip = 298;
+			let ledMap = [];
+			let ledX = {};			
 
-			universe.updateAll(0); // Permet de reseter les led... @todo utiliser update() au lieu de add()
-			ledChannel = percentBar * 150 / 100;		
-
-			(function generateLed1(n) {
-				console.log('LED #1', n, 'de ', ledChannel);						
-				let ledColor = pliabAnim.convertLedColorToDMX(n, color);
-
-				animation.add(ledColor);
-				animation.run(universe);
-				if (n < ledChannel - 3) {
-					setTimeout(function() {
-						generateLed1(n+3);
-					}, 0);
-				}
-			}(0));
+			let percentLeds = Math.round(percentBar * 150 / 100); // 29% => 43.21
+ 
+			let ledColorDMX = pliabAnim.convertLedColorToDMX(color);
 			
+			console.log('percentLeds', percentLeds);
+			console.log('color', ledColorDMX);
+			// Open led 1
+			for (let i=0; i < percentLeds; i++)
+			{
+				ledX[i] = ledColorDMX[0];
+				ledX[++i] = ledColorDMX[1];				
+				ledX[++i] = ledColorDMX[2];							
+			}	
 
-			let ledChannel2 = (100-percentBar/2) * 300 / 100;		
+			// Close Led 1
+			for (let i = percentLeds; i < oneLedStrip; i++) 
+			{					
+				ledX[i] = 0;
+				ledX[++i] = 0;
+				ledX[++i] = 0;
+			}			
 
-			(function generateLed2(n) {
-				console.log('LED #2', n, 'de ', ledChannel2);	
-				let ledColor = pliabAnim.convertLedColorToDMX(n, color);
+			// Open Led 2
+			for (let i = 150+(150-percentLeds); i < 299; i++) 
+			{
+				ledX[i] = ledColorDMX[0];
+				ledX[++i] = ledColorDMX[1];				
+				ledX[++i] = ledColorDMX[2];
+			}
 
-				animation.add(ledColor);
-				animation.run(universe);
-				if (n > ledChannel2) {
-					setTimeout(function() {
-						generateLed2(n-3);
-					}, 0);
+			// Close Led 2
+			if (percentLeds != 150) {
+				for (let i=150; i < 150+(150-percentLeds); i++)
+				{	
+					ledX[i] = 0;
+					ledX[++i] = 0;
+					ledX[++i] = 0;
 				}
-			}(300));
+			}
+			
+			console.log('ledXFin', ledX);
+			universe.update(ledX);
 
 			res.json({"success": true});
 		} catch(e) {
@@ -147,7 +154,7 @@ function DMXWeb() {
 	
 	});
 
-	app.post('/animation/:universe', function(req, res) {
+	app.post('/animation/:universe', function(req, res) {		
 		try {
 			var universe = dmx.universes[req.params.universe]
 

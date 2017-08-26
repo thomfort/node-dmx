@@ -3,13 +3,15 @@ const convert = require('color-convert');
 // {"0": 255, "1": 0, "2": 244, "3": 255}
 // Channel 4c-1
 module.exports = class plibAnim {
-  static convertToDMX(step, isLed) {
+  static convertToDMX(step) {
     const DEVICE_MAP = {
-      1: 0, // d.001
-      2: 400 // d.400
+      1: 400, // d.401
+      2: 415, // d.417
+      3: 430, // d.432
+      4: 445 // d.446
     };
     
-    let deviceId = DEVICE_MAP[step.deviceId] || 0;
+    let deviceId = DEVICE_MAP[step.deviceId];
     let convertedOpacity, convertedColor, dmxFormat = {};
 
     if (step.to.opacity === 0) {
@@ -19,31 +21,20 @@ module.exports = class plibAnim {
       convertedColor = this._convertHexToRgb(step.to.color);
       convertedOpacity = this._convertOpacity(step.to.opacity);
     }
+  
+    dmxFormat[deviceId]   = convertedOpacity;
+    dmxFormat[++deviceId] = convertedColor[0];
+    dmxFormat[++deviceId] = convertedColor[1];
+    dmxFormat[++deviceId] = convertedColor[2];
 
-    if (!isLed) {
-      dmxFormat[deviceId]   = convertedOpacity;
-      dmxFormat[++deviceId] = convertedColor[0];
-      dmxFormat[++deviceId] = convertedColor[1];
-      dmxFormat[++deviceId] = convertedColor[2];
-    } else {
-      dmxFormat[deviceId] = convertedColor[0];
-      dmxFormat[++deviceId] = convertedColor[1];
-      dmxFormat[++deviceId] = convertedColor[2];
-    }
-    
-
-    console.log('dmxFormat', dmxFormat);
     return dmxFormat;
   }
 
-  static convertLedColorToDMX(channel,color) {
-    let dmxFormat = {};
+  static convertLedColorToDMX(color) {
+    let dmxFormat = [];
     let convertedColor = this._convertHexToRgb(color);
-    console.log('convertedColor', convertedColor);
 
-    dmxFormat[channel] = convertedColor[0];
-    dmxFormat[++channel] = convertedColor[1];
-    dmxFormat[++channel] = convertedColor[2];
+    dmxFormat = [convertedColor[0], convertedColor[1], convertedColor[2]];
 
     return dmxFormat;
   }

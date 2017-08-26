@@ -5,7 +5,7 @@ const SerialPort = require("serialport");
 const	  ENTTEC_PRO_DMX_STARTCODE = 0x00
 , ENTTEC_PRO_START_OF_MSG  = 0x7e
 , ENTTEC_PRO_END_OF_MSG    = 0xe7
-, ENTTEC_PRO_SEND_DMX_RQ   = 0x06
+, ENTTEC_PRO_SEND_DMX_RQ   = 0x06 
 , ENTTEC_PRO_RECV_DMX_PKT  = 0x05
 ;
 
@@ -30,7 +30,7 @@ const EnttecUSBDMXPRO = class EnttecUSBDMXPRO {
 	send_universe () {
 		if(!this.dev.isOpen()) {
 			return;
-		}
+		}	
 		const hdr = Buffer([
 			ENTTEC_PRO_START_OF_MSG,
 			ENTTEC_PRO_SEND_DMX_RQ,
